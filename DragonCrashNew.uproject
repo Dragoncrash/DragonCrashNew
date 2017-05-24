@@ -15,6 +15,10 @@
 			"Name": "GameLiftServerSDK",
 			"Enabled": true
 		},
-		
+		{
+			"Name": "VictoryPlugin",
+			"Enabled": true,
+			"MarketplaceURL": "http://www.ue4code.com"
+		}
 	]
 }
