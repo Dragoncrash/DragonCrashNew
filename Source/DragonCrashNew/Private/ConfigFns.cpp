@@ -130,6 +130,7 @@ void UConfigFns::checkConfig(const FString& fname,const FString& section,const F
 int UGConfigFns::preset;
 TArray<FIntPoint> UGConfigFns::Resolutions;
 float UGConfigFns::res_scale;
+FIntPoint UGConfigFns::curr_res;
 /*int UGConfigFns::TQ;
 int UGConfigFns::EQ;
 int UGConfigFns::SQ;
@@ -161,28 +162,32 @@ void UGConfigFns::LoadFromConfig() {
 	else preset = static_cast<int>(G_Presets::LOW);
 
 	if (isCustomGraphics()) {
-		//AAM
+		//AAM 
+		FString AAM;
 		if (ReadValid(GFILE, "Graphics", "AAM")) {
 			auto AAM_Int = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "AAM"));
-			auto AAM = UKismetStringLibrary::Conv_IntToString(FMath::Clamp(AAM_Int, 0, 2));
-			GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing " + AAM), *GLog);
+			AAM = UKismetStringLibrary::Conv_IntToString(FMath::Clamp(AAM_Int, 0, 2));
+			//GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing " + AAM), *GLog);
 		}
 		else {
 			WriteCustomConfig(GFILE, "Graphics", "AAM", "0");
-			GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing 0"), *GLog);
+			AAM = FString("0");
+			//GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing 0"), *GLog);
 		}
-		//AF
+		//AF 
+		FString AF;
 		if (ReadValid(GFILE, "Graphics", "AF")) {
 			auto AF_Int = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "AF"));
-			auto AF = UKismetStringLibrary::Conv_IntToString(FMath::Clamp(AF_Int, 0, 8));
-			GEngine->GameViewport->Exec(NULL, *FString("r.MaxAnisotropy " + AF), *GLog);
+			AF = UKismetStringLibrary::Conv_IntToString(FMath::Clamp(AF_Int, 0, 8));
+			//GEngine->GameViewport->Exec(NULL, *FString("r.MaxAnisotropy " + AF), *GLog);
 		}
 		else {
 			WriteCustomConfig(GFILE, "Graphics", "AF", "0");
-			GEngine->GameViewport->Exec(NULL, *FString("r.MaxAnisotropy 0"), *GLog);
+			AF = FString("0");
+			//GEngine->GameViewport->Exec(NULL, *FString("r.MaxAnisotropy 0"), *GLog);
 		}
-		//Curr_Res
-		int resx, resy;
+		//Resolution
+		int resx=0, resy=0;
 		if (ReadValid(GFILE, "Graphics", "ResolutionX")) {
 			resx = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionX"));
 		}
@@ -197,6 +202,26 @@ void UGConfigFns::LoadFromConfig() {
 		}
 
 		curr_res = FIntPoint(resx, resy);
+		//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(curr_res);
+
+		//Resolution Scale
+		int res_scale;
+		if (ReadValid(GFILE, "Graphics", "ResolutionScale")) {
+			res_scale = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionScale"));
+		}
+		else {
+			WriteCustomConfig(GFILE, "Graphics", "ResolutionScale", "50");
+			res_scale = 50;
+		}
+
+		//Fullscreen
+		int fullscreenmode;
+		if (ReadValid(GFILE, "Graphics", "Fullscreen")) {
+			//TODO
+		}
+		else {
+			fullscreenmode = static_cast<int>(EWindowMode::Type::Windowed);
+		}
 	}
 	else LoadPreset();
 }
@@ -260,7 +285,15 @@ void UGConfigFns::LoadFromSettings() {
 	int32 c_scale, min_scale, max_scale;
 	UGameUserSettings::GetGameUserSettings()->GetResolutionScaleInformation(c_scale_norm,c_scale,min_scale,max_scale);
 
-	//Fullscreen Mode
+	//Resolution
+	//FIntPoint last_res = UGameUserSettings::GetGameUserSettings()->GetLastConfirmedScreenResolution();
+
+	//Fullscreen
+	EWindowMode::Type last_fs = UGameUserSettings::GetGameUserSettings()->GetLastConfirmedFullscreenMode();
+
+	//VSync
+	bool vsync_enabled = UGameUserSettings::GetGameUserSettings()->IsVSyncEnabled();
+
 }
 
 bool UGConfigFns::isCustomGraphics() {
