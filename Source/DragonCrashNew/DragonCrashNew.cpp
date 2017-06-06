@@ -3,3 +3,5 @@
 #include "DragonCrashNew.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, DragonCrashNew, "DragonCrashNew" );
+
+DEFINE_LOG_CATEGORY(ConfigFunctions);
