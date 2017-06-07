@@ -13,7 +13,6 @@
 
 #define GFILE  "CustomSettings.ini"
 
-
 UCLASS(Config=Engine)
 class DRAGONCRASHNEW_API UConfigFns : public UBlueprintFunctionLibrary
 {
@@ -41,7 +40,9 @@ public:
 
 	static void checkFileIOEnabled();
 	static bool FileIsValid(const FString& filepath, bool forceCreate = true);
+	UFUNCTION(BlueprintCallable, Category = "Config|Test")
 	static FString ReadValue(const FString& filepath, const FString& section, const FString& var);
+	UFUNCTION(BlueprintCallable, Category="Config|Test")
 	static bool ReadValid(const FString & filename, const FString & section, const FString & var);
 };
 
@@ -64,6 +65,8 @@ public:
 	//Presets
 	static int preset;
 	static TArray<FIntPoint> Resolutions;
+	//static int resX;
+	//static int resY;
 	static FIntPoint curr_res;
 	static float res_scale;
 	static int AAM_Type;
@@ -107,6 +110,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Config|Graphics|Variables")
 	static void getCustomSettings(int& o_preset, FIntPoint& o_curr_res, float& o_res_scale, int& o_aamtype, int& o_aamlevel, int& o_af, int& o_fsm, bool& o_vs, int& o_eq, int& o_sq, int& o_tq, int& o_ppq) {
 		o_preset = getPreset();
+		//o_curr_resX = resX;
+		//o_curr_resY = resY;
 		o_curr_res = getCurrentResolution();
 		o_res_scale = getResolutionScale();
 		o_aamtype = getAAM_Type();

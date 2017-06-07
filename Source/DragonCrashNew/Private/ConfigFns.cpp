@@ -14,7 +14,7 @@ void UConfigFns::ReadCustomConfig(const FString& filename, const FString& sectio
 
 	FileIsValid(filepath);
 	out_value = ReadValue(filename, section, var);
-	if (out_value == FString("--")) out_valid = false;
+	if (out_value == FString()) out_valid = false;
 
 }
 
@@ -88,7 +88,7 @@ FString UConfigFns::ReadValue(const FString& filename, const FString& section, c
 	if (GConfig->DoesSectionExist(*section, filepath)) {
 		GConfig->GetString(*section, *var, out_value, filepath);
 	}
-	else out_value = FString("--");
+	else out_value = FString();
 
 	return out_value;
 }
@@ -99,7 +99,7 @@ bool UConfigFns::ReadValid(const FString& filename, const FString& section, cons
 	FString out_value = FString();
 	if (GConfig->DoesSectionExist(*section, filepath)) {
 		GConfig->GetString(*section, *var, out_value, filepath);
-		return out_value == FString();
+		return out_value != FString();
 	}
 	return false;
 }
@@ -110,14 +110,13 @@ void UConfigFns::checkConfig(const FString& fname,const FString& section,const F
 	checkFileIOEnabled();
 
 	FString filepath = FPaths::Combine(FPaths::GameConfigDir(), fname);
-	
 
 	if (!FPaths::FileExists(filepath)) {
 		FString cleanname = FPaths::GetCleanFilename(filepath);
 		GConfig->LoadGlobalIniFile(cleanname, *FPaths::GetBaseFilename(filepath), NULL, true);
 	}
 
-	if (!GConfig->DoesSectionExist(*section, filepath)) {
+	if (!ReadValid(GFILE,section,key)) {
 		WriteCustomConfig(fname, section, key, defaultValue);
 	}
 }
@@ -128,6 +127,8 @@ void UConfigFns::checkConfig(const FString& fname,const FString& section,const F
 //Presets
 int UGConfigFns::preset;
 TArray<FIntPoint> UGConfigFns::Resolutions;
+//int UGConfigFns::resX;
+//int UGConfigFns::resY;
 float UGConfigFns::res_scale;
 FIntPoint UGConfigFns::curr_res;
 int UGConfigFns::AAM_Type;
@@ -143,6 +144,7 @@ int UGConfigFns::postprocess_quality;
 void UGConfigFns::OnConstructed(){
 	UKismetSystemLibrary::GetSupportedFullscreenResolutions(Resolutions);
 	checkAllConfig();
+	//LoadPreset(false);
 	LoadFromConfig();
 }
 
@@ -166,25 +168,23 @@ void UGConfigFns::LoadFromConfig() {
 	}
 	else {
 		preset = static_cast<int>(G_Presets::LOW);
-		WriteCustomConfig(GFILE, "Graphics", "Preset", "1");
+		WriteCustomConfig(GFILE, "Graphics", "Preset", "0");
+	}
+#pragma endregion	
+	//AAM Type
+#pragma region AAM
+	if (ReadValid(GFILE, "Graphics", "AAM_Type")) {
+		AAM_Type = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "AAM"));
+		//AAM = UKismetStringLibrary::Conv_IntToString(FMath::Clamp(AAM_Int, 0, 2));
+		//GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing " + AAM), *GLog);
+	}
+	else {
+		WriteCustomConfig(GFILE, "Graphics", "AAM_Type", "0");
+		AAM_Type = 0;
+		//GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing 0"), *GLog);
 	}
 #pragma endregion
-
-	if (isCustomGraphics()) {
-		//AAM Type
-#pragma region AAM
-		if (ReadValid(GFILE, "Graphics", "AAM")) {
-			AAM_Type = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "AAM"));
-			//AAM = UKismetStringLibrary::Conv_IntToString(FMath::Clamp(AAM_Int, 0, 2));
-			//GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing " + AAM), *GLog);
-		}
-		else {
-			WriteCustomConfig(GFILE, "Graphics", "AAM", "0");
-			AAM_Type = 0;
-			//GEngine->GameViewport->Exec(NULL, *FString("r.DefaultFeature.AntiAliasing 0"), *GLog);
-		}
-#pragma endregion
-		//AF 
+	//AF 
 #pragma region AF
 		if (ReadValid(GFILE, "Graphics", "AF")) {
 			AF = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "AF"));
@@ -197,28 +197,28 @@ void UGConfigFns::LoadFromConfig() {
 			//GEngine->GameViewport->Exec(NULL, *FString("r.MaxAnisotropy 0"), *GLog);
 		}
 #pragma endregion
-		//Resolution
+	//Resolution
 #pragma region Resolution
-		int resx, resy;
+		int resX, resY;
 		if (ReadValid(GFILE, "Graphics", "ResolutionX")) {
-			resx = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionX"));
+			resX = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionX"));
 		}
 		if (ReadValid(GFILE, "Graphics", "ResolutionY")) {
-			resy = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionY"));
+			resY = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionY"));
 		}
 		
-		if (resx <= 0 || resy <= 0) {
-			auto tmp = UGameUserSettings::GetDefaultResolution();
-			resx = tmp.X;
-			resy = tmp.Y;
-			WriteCustomConfig(GFILE, "Graphics", "ResolutionX", UKismetStringLibrary::Conv_IntToString(resx));
-			WriteCustomConfig(GFILE, "Graphics", "ResolutionY", UKismetStringLibrary::Conv_IntToString(resy));
+		if (resX <= 0 || resY <= 0) {
+			FIntPoint tmp = UGameUserSettings::GetGameUserSettings()->GetDefaultResolution();
+			resX = tmp.X;
+			resY = tmp.Y;
+			WriteCustomConfig(GFILE, "Graphics", "ResolutionX", UKismetStringLibrary::Conv_IntToString(resX));
+			WriteCustomConfig(GFILE, "Graphics", "ResolutionY", UKismetStringLibrary::Conv_IntToString(resY));
 		}
 
-		curr_res = FIntPoint(resx, resy);
-		//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(curr_res);
+		curr_res = FIntPoint(resX, resY);
+		
 #pragma endregion
-		//Resolution Scale
+	//Resolution Scale
 #pragma region Resolution Scale
 		if (ReadValid(GFILE, "Graphics", "ResolutionScale")) {
 			res_scale = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionScale"));
@@ -228,7 +228,7 @@ void UGConfigFns::LoadFromConfig() {
 			res_scale = 50;
 		}
 #pragma endregion
-		//Fullscreen
+	//Fullscreen
 #pragma region Fullscreen
 		if (ReadValid(GFILE, "Graphics", "Fullscreen")) {
 			fullscreenmode = static_cast<EWindowMode::Type>(UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "Fullscreen")));
@@ -238,7 +238,7 @@ void UGConfigFns::LoadFromConfig() {
 			WriteCustomConfig(GFILE, "Graphics", "FullscreenMode",UKismetStringLibrary::Conv_IntToString(fullscreenmode));
 		}
 #pragma endregion
-		//VSync
+	//VSync
 #pragma region VSync
 		if (ReadValid(GFILE, "Graphics", "VSync")) {
 			vsync_enabled = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "VSync")) == 0;
@@ -248,7 +248,7 @@ void UGConfigFns::LoadFromConfig() {
 			WriteCustomConfig(GFILE, "Graphics", "VSync", FString("0"));
 		}
 #pragma endregion
-		//EQ
+	//EQ
 #pragma region EffectsQuality
 		if (ReadValid(GFILE, "Graphics","EffectsQuality")) {
 			effects_quality = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "EffectsQuality"));
@@ -258,7 +258,7 @@ void UGConfigFns::LoadFromConfig() {
 			WriteCustomConfig(GFILE, "Graphics", "EffectsQuality", "0");
 		}
 #pragma endregion
-		//SQ
+	//SQ
 #pragma region ShadowQuality
 		if (ReadValid(GFILE, "Graphics", "ShadowQuality")) {
 			shadow_quality = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ShadowQuality"));
@@ -268,7 +268,7 @@ void UGConfigFns::LoadFromConfig() {
 			WriteCustomConfig(GFILE, "Graphics", "ShadowQuality", "0");
 		}
 #pragma endregion
-		//TQ
+	//TQ
 #pragma region TextureQuality
 		if (ReadValid(GFILE, "Graphics", "TextureQuality")) {
 			texture_quality = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "TextureQuality"));
@@ -278,7 +278,7 @@ void UGConfigFns::LoadFromConfig() {
 			WriteCustomConfig(GFILE, "Graphics", "TextureQuality", "0");
 		}
 #pragma endregion
-		//AAM_Level
+	//AAM_Level
 #pragma region AA_Level
 		if (ReadValid(GFILE, "Graphics", "AA_Level")) {
 			AAM_Level = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "AA_Level"));
@@ -288,7 +288,7 @@ void UGConfigFns::LoadFromConfig() {
 			WriteCustomConfig(GFILE, "Graphics", "AA_Level", "2");
 		}
 #pragma endregion
-		//PPQ
+	//PPQ
 #pragma region PostProcessQuality
 		if (ReadValid(GFILE, "Graphics", "PostProcessQuality")) {
 			postprocess_quality = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "PostProcessQuality"));
@@ -299,10 +299,10 @@ void UGConfigFns::LoadFromConfig() {
 		}
 #pragma endregion
 
-		ApplyCustomSettings();
+	ApplyCustomSettings();
 		
-	}
-	else LoadPreset();
+	
+	LoadPreset();
 }
 
 void UGConfigFns::ApplyCustomSettings() {
@@ -387,6 +387,15 @@ void UGConfigFns::LoadPreset(bool force) {
 			UE_LOG(ConfigFunctions, Warning, TEXT("Unknown case reached as preset!"));
 			break;
 	};
+	WriteCustomConfig(GFILE, "Graphics", "Preset", UKismetStringLibrary::Conv_IntToString(preset));
+	WriteCustomConfig(GFILE, "Graphics", "ResolutionScale", UKismetStringLibrary::Conv_IntToString(res_scale));
+	WriteCustomConfig(GFILE, "Graphics", "AA_Level", UKismetStringLibrary::Conv_IntToString(AAM_Level));
+	WriteCustomConfig(GFILE, "Graphics", "AF", UKismetStringLibrary::Conv_IntToString(AF));
+	WriteCustomConfig(GFILE, "Graphics", "EffectsQuality", UKismetStringLibrary::Conv_IntToString(effects_quality));
+	WriteCustomConfig(GFILE, "Graphics", "ShadowQuality", UKismetStringLibrary::Conv_IntToString(shadow_quality));
+	WriteCustomConfig(GFILE, "Graphics", "TextureQuality", UKismetStringLibrary::Conv_IntToString(texture_quality));
+	WriteCustomConfig(GFILE, "Graphics", "PostProcessQuality", UKismetStringLibrary::Conv_IntToString(postprocess_quality));
+
 	if (force)ApplyGraphicsSettings();
 }
 
