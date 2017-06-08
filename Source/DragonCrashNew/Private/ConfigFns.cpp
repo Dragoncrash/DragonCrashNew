@@ -8,7 +8,8 @@ void UConfigFns::ReadCustomConfig(const FString& filename, const FString& sectio
 
 	//Config handler is GConfig I think...
 	
-	FString filepath = FPaths::Combine(FPaths::GameConfigDir(), filename);
+	FString filepath = FPaths::Combine(FPaths::EngineUserDir(), filename);
+	GConfig->Flush(true, filepath);
 	out_filepath = filepath;
 	out_valid = true;
 
@@ -23,7 +24,7 @@ void UConfigFns::WriteCustomConfig(const FString& filename, const FString& secti
 	if (!GConfig) return;
 	checkFileIOEnabled();
 
-	FString filepath = FPaths::Combine(FPaths::GameConfigDir(), filename);
+	FString filepath = FPaths::Combine(FPaths::EngineUserDir(), filename);
 	FileIsValid(filename);
 	//Create config if it does not exist and reload values
 	/*if (!FPaths::FileExists(filepath)) {
@@ -43,7 +44,7 @@ void UConfigFns::ReadEngineConfig(const FString & section, const FString & var, 
 {
 	if (!GConfig) return;
 	checkFileIOEnabled();
-
+	GConfig->Flush(true, GEngineIni);
 	out_valid = true;
 	if (GConfig->DoesSectionExist(*section, GEngineIni)) {
 		GConfig->GetString(*section, *var, out_value, GEngineIni);
@@ -56,7 +57,7 @@ void UConfigFns::WriteEngineConfig(const FString & section, const FString & var,
 	if (!GConfig) return;
 	checkFileIOEnabled();
 
-	FString filepath = FPaths::Combine(FPaths::GameUserDir(), GEngineIni);
+	//FString filepath = FPaths::Combine(FPaths::GameUserDir(), GEngineIni);
 
 	//File exists so modify the values
 	GConfig->SetString(*section, *var, *value, GEngineIni);
@@ -83,7 +84,8 @@ bool UConfigFns::FileIsValid(const FString& filepath, bool forceCreate) {
 }
 
 FString UConfigFns::ReadValue(const FString& filename, const FString& section, const FString& var) {
-	FString filepath = FPaths::Combine(FPaths::GameConfigDir(), filename);
+	FString filepath = FPaths::Combine(FPaths::EngineUserDir(), filename);
+	GConfig->Flush(true, filepath);
 	FString out_value = FString();
 	if (GConfig->DoesSectionExist(*section, filepath)) {
 		GConfig->GetString(*section, *var, out_value, filepath);
@@ -94,7 +96,8 @@ FString UConfigFns::ReadValue(const FString& filename, const FString& section, c
 }
 
 bool UConfigFns::ReadValid(const FString& filename, const FString& section, const FString& var) {
-	FString filepath = FPaths::Combine(FPaths::GameConfigDir(), filename);
+	FString filepath = FPaths::Combine(FPaths::EngineUserDir(), filename);
+	GConfig->Flush(true, filepath);
 	bool out_valid = true;
 	FString out_value = FString();
 	if (GConfig->DoesSectionExist(*section, filepath)) {
@@ -109,8 +112,8 @@ void UConfigFns::checkConfig(const FString& fname,const FString& section,const F
 	if (!GConfig) return;
 	checkFileIOEnabled();
 
-	FString filepath = FPaths::Combine(FPaths::GameConfigDir(), fname);
-
+	FString filepath = FPaths::Combine(FPaths::EngineUserDir(), fname);
+	GConfig->Flush(true, filepath);
 	if (!FPaths::FileExists(filepath)) {
 		FString cleanname = FPaths::GetCleanFilename(filepath);
 		GConfig->LoadGlobalIniFile(cleanname, *FPaths::GetBaseFilename(filepath), NULL, true);
@@ -146,6 +149,7 @@ void UGConfigFns::OnConstructed(){
 	checkAllConfig();
 	//LoadPreset(false);
 	LoadFromConfig();
+	//ApplyCustomSettings();
 }
 
 void UGConfigFns::RefreshPreset(int Preset) {
@@ -208,11 +212,11 @@ void UGConfigFns::LoadFromConfig() {
 		}
 		
 		if (resX <= 0 || resY <= 0) {
-			FIntPoint tmp = UGameUserSettings::GetGameUserSettings()->GetDefaultResolution();
+			FIntPoint tmp = Resolutions[0];//UGameUserSettings::GetGameUserSettings()->GetDefaultResolution();
 			resX = tmp.X;
 			resY = tmp.Y;
-			WriteCustomConfig(GFILE, "Graphics", "ResolutionX", UKismetStringLibrary::Conv_IntToString(resX));
-			WriteCustomConfig(GFILE, "Graphics", "ResolutionY", UKismetStringLibrary::Conv_IntToString(resY));
+			//WriteCustomConfig(GFILE, "Graphics", "ResolutionX", UKismetStringLibrary::Conv_IntToString(resX));
+			//WriteCustomConfig(GFILE, "Graphics", "ResolutionY", UKismetStringLibrary::Conv_IntToString(resY));
 		}
 
 		curr_res = FIntPoint(resX, resY);
@@ -220,13 +224,13 @@ void UGConfigFns::LoadFromConfig() {
 #pragma endregion
 	//Resolution Scale
 #pragma region Resolution Scale
-		if (ReadValid(GFILE, "Graphics", "ResolutionScale")) {
+		/*if (ReadValid(GFILE, "Graphics", "ResolutionScale")) {
 			res_scale = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Graphics", "ResolutionScale"));
 		}
 		else {
 			WriteCustomConfig(GFILE, "Graphics", "ResolutionScale", "50");
 			res_scale = 50;
-		}
+		}*/
 #pragma endregion
 	//Fullscreen
 #pragma region Fullscreen
@@ -235,7 +239,7 @@ void UGConfigFns::LoadFromConfig() {
 		}
 		else {
 			fullscreenmode = static_cast<int>(EWindowMode::Type::Windowed);
-			WriteCustomConfig(GFILE, "Graphics", "FullscreenMode",UKismetStringLibrary::Conv_IntToString(fullscreenmode));
+			//WriteCustomConfig(GFILE, "Graphics", "FullscreenMode",UKismetStringLibrary::Conv_IntToString(fullscreenmode));
 		}
 #pragma endregion
 	//VSync
@@ -255,7 +259,7 @@ void UGConfigFns::LoadFromConfig() {
 		}
 		else {
 			effects_quality = 0;
-			WriteCustomConfig(GFILE, "Graphics", "EffectsQuality", "0");
+			//WriteCustomConfig(GFILE, "Graphics", "EffectsQuality", "0");
 		}
 #pragma endregion
 	//SQ
@@ -299,7 +303,7 @@ void UGConfigFns::LoadFromConfig() {
 		}
 #pragma endregion
 
-	ApplyCustomSettings();
+	//ApplyCustomSettings();
 		
 	
 	LoadPreset();
@@ -308,6 +312,8 @@ void UGConfigFns::LoadFromConfig() {
 void UGConfigFns::ApplyCustomSettings() {
 	ApplyGraphicsSettings();
 	ApplyScreenSettings();
+	syncToFile();
+	UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
 }
 
 void UGConfigFns::ApplyGraphicsSettings() {
@@ -387,16 +393,23 @@ void UGConfigFns::LoadPreset(bool force) {
 			UE_LOG(ConfigFunctions, Warning, TEXT("Unknown case reached as preset!"));
 			break;
 	};
+	
+	if (force)ApplyGraphicsSettings();
+}
+
+void UGConfigFns::syncToFile() {
 	WriteCustomConfig(GFILE, "Graphics", "Preset", UKismetStringLibrary::Conv_IntToString(preset));
 	WriteCustomConfig(GFILE, "Graphics", "ResolutionScale", UKismetStringLibrary::Conv_IntToString(res_scale));
+	WriteCustomConfig(GFILE, "Graphics", "AAM_Type", UKismetStringLibrary::Conv_IntToString(AAM_Type));
 	WriteCustomConfig(GFILE, "Graphics", "AA_Level", UKismetStringLibrary::Conv_IntToString(AAM_Level));
 	WriteCustomConfig(GFILE, "Graphics", "AF", UKismetStringLibrary::Conv_IntToString(AF));
 	WriteCustomConfig(GFILE, "Graphics", "EffectsQuality", UKismetStringLibrary::Conv_IntToString(effects_quality));
 	WriteCustomConfig(GFILE, "Graphics", "ShadowQuality", UKismetStringLibrary::Conv_IntToString(shadow_quality));
 	WriteCustomConfig(GFILE, "Graphics", "TextureQuality", UKismetStringLibrary::Conv_IntToString(texture_quality));
 	WriteCustomConfig(GFILE, "Graphics", "PostProcessQuality", UKismetStringLibrary::Conv_IntToString(postprocess_quality));
-
-	if (force)ApplyGraphicsSettings();
+	WriteCustomConfig(GFILE, "Graphics", "VSync", vsync_enabled ? "1" : "0");
+	WriteCustomConfig(GFILE, "Graphics", "ResolutionX", UKismetStringLibrary::Conv_IntToString(curr_res.X));
+	WriteCustomConfig(GFILE, "Graphics", "ResolutionY", UKismetStringLibrary::Conv_IntToString(curr_res.Y));
 }
 
 bool UGConfigFns::isCustomGraphics() {

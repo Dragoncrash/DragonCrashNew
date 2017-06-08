@@ -130,7 +130,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Config|Graphics|Variables")
 	static void setCurrentResolution(FIntPoint n) {
 		if (Resolutions.Find(n) != INDEX_NONE)curr_res = n;
-		else UE_LOG(ConfigFunctions, Warning, TEXT("Attempted to set invalid or unsupported resolution!"));
+		//else UE_LOG(ConfigFunctions, Warning, TEXT("Attempted to set invalid or unsupported resolution!"));
 	}
 	UFUNCTION(BlueprintCallable, Category = "Config|Graphics|Variables")
 	static void setResolutionScale(float n) { res_scale = FMath::Clamp(n, 25.0f, 100.0f); }
@@ -164,10 +164,20 @@ public:
 	//UFUNCTION(BlueprintCallable, Category = "Graphics")
 	static void LoadFromConfig();
 	static void LoadPreset(bool force = true);
+
+	UFUNCTION(BlueprintCallable, Category="Config|Graphics")
 	static void ApplyCustomSettings();
+	
 	static void ApplyGraphicsSettings();
 	static void ApplyScreenSettings();
 	
+	static void syncToFile();
+	
 	UFUNCTION(BlueprintPure, Category = "Config|Graphics")
 	static bool isCustomGraphics();
+
+	UFUNCTION(BlueprintCallable,Category="Config|Test")
+	static FString getEUDir() {
+		return FPaths::Combine(FPaths::EngineUserDir(), "testConfig.ini"); 
+	}
 };
