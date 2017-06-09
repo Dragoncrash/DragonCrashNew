@@ -13,7 +13,7 @@
 
 #define GFILE  "CustomSettings.ini"
 
-UCLASS(Config=Engine)
+UCLASS()
 class DRAGONCRASHNEW_API UConfigFns : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -46,7 +46,7 @@ public:
 	static bool ReadValid(const FString & filename, const FString & section, const FString & var);
 };
 
-UCLASS(Config=Engine)
+UCLASS()
 class DRAGONCRASHNEW_API UGConfigFns : public UConfigFns
 {
 	GENERATED_BODY()
@@ -180,4 +180,50 @@ public:
 	static FString getEUDir() {
 		return FPaths::Combine(FPaths::EngineUserDir(), "testConfig.ini"); 
 	}
+};
+
+UCLASS()
+class DRAGONCRASHNEW_API UAConfigFns: public UConfigFns {
+	GENERATED_BODY()
+public:
+	static int master_volume;
+	static int sfx_volume;
+	static int crowd_volume;
+	static int bgm_volume;
+
+	//Accessors
+	UFUNCTION(BlueprintPure, Category="Config|Audio|Variables")
+	static int getMasterVolume() { return master_volume; }
+	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
+	static int getSFXVolume() { return sfx_volume; }
+	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
+	static int getCrowdVolume() { return crowd_volume; }
+	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
+	static int getBGMVolume() { return bgm_volume; }
+	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
+	static void getCustomAudioSettings(int& MasterVolume, int& SFXVolume, int& CrowdVolume, int& BGMVolume) {
+		MasterVolume = getMasterVolume();
+		SFXVolume = getSFXVolume();
+		CrowdVolume = getCrowdVolume();
+		BGMVolume = getBGMVolume();
+	}
+
+	//Mutators
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
+	static void setMasterVolume(int MasterVolume) { master_volume = FMath::Clamp(MasterVolume, 0, 100); }
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
+	static void setSFXVolume(int SFX_Volume) { sfx_volume = FMath::Clamp(SFX_Volume, 0, 100); }
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
+	static void setCrowdVolume(int CrowdVolume) { crowd_volume = FMath::Clamp(CrowdVolume, 0, 100); }
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
+	static void setBGMVolume(int BGMVolume) { bgm_volume = FMath::Clamp(BGMVolume, 0, 100); }
+
+	//Nodes
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio")
+	static void onConstructed();
+
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio")
+	static void ApplyCustomSettings() { syncToFile(); }
+
+	static void syncToFile();
 };
