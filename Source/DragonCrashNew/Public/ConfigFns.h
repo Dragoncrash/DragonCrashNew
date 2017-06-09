@@ -186,22 +186,22 @@ UCLASS()
 class DRAGONCRASHNEW_API UAConfigFns: public UConfigFns {
 	GENERATED_BODY()
 public:
-	static int master_volume;
-	static int sfx_volume;
-	static int crowd_volume;
-	static int bgm_volume;
+	static float master_volume;
+	static float sfx_volume;
+	static float crowd_volume;
+	static float bgm_volume;
 
 	//Accessors
 	UFUNCTION(BlueprintPure, Category="Config|Audio|Variables")
-	static int getMasterVolume() { return master_volume; }
+	static float getMasterVolume() { return master_volume; }
 	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
-	static int getSFXVolume() { return sfx_volume; }
+	static float getSFXVolume() { return sfx_volume; }
 	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
-	static int getCrowdVolume() { return crowd_volume; }
+	static float getCrowdVolume() { return crowd_volume; }
 	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
-	static int getBGMVolume() { return bgm_volume; }
+	static float getBGMVolume() { return bgm_volume; }
 	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
-	static void getCustomAudioSettings(int& MasterVolume, int& SFXVolume, int& CrowdVolume, int& BGMVolume) {
+	static void getCustomAudioSettings(float& MasterVolume, float& SFXVolume, float& CrowdVolume, float& BGMVolume) {
 		MasterVolume = getMasterVolume();
 		SFXVolume = getSFXVolume();
 		CrowdVolume = getCrowdVolume();
@@ -210,13 +210,13 @@ public:
 
 	//Mutators
 	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
-	static void setMasterVolume(int MasterVolume) { master_volume = FMath::Clamp(MasterVolume, 0, 100); }
+	static void setMasterVolume(float MasterVolume) { master_volume = FMath::Clamp(MasterVolume, 0.0f, 1.0f); }
 	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
-	static void setSFXVolume(int SFX_Volume) { sfx_volume = FMath::Clamp(SFX_Volume, 0, 100); }
+	static void setSFXVolume(float SFX_Volume) { sfx_volume = FMath::Clamp(SFX_Volume, 0.0f, 1.0f); }
 	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
-	static void setCrowdVolume(int CrowdVolume) { crowd_volume = FMath::Clamp(CrowdVolume, 0, 100); }
+	static void setCrowdVolume(float CrowdVolume) { crowd_volume = FMath::Clamp(CrowdVolume, 0.0f, 1.0f); }
 	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
-	static void setBGMVolume(int BGMVolume) { bgm_volume = FMath::Clamp(BGMVolume, 0, 100); }
+	static void setBGMVolume(float BGMVolume) { bgm_volume = FMath::Clamp(BGMVolume, 0.0f, 1.0f); }
 
 	//Nodes
 	UFUNCTION(BlueprintCallable, Category = "Config|Audio")

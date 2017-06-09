@@ -424,10 +424,10 @@ bool UGConfigFns::isCustomGraphics() {
 #pragma endregion
 
 #pragma region AConfig
-int UAConfigFns::master_volume;
-int UAConfigFns::sfx_volume;
-int UAConfigFns::crowd_volume;
-int UAConfigFns::bgm_volume;
+float UAConfigFns::master_volume;
+float UAConfigFns::sfx_volume;
+float UAConfigFns::crowd_volume;
+float UAConfigFns::bgm_volume;
 
 
 void UAConfigFns::onConstructed() {
