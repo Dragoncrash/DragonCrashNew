@@ -7,7 +7,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "DragonCrashGameModeBase.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(DragonCrashDedicatedServer, Log, All);
 
 /**
  * 

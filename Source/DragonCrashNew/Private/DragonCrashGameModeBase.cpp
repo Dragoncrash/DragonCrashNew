@@ -4,15 +4,12 @@
 #include "DragonCrashGameModeBase.h"
 
 
-DEFINE_LOG_CATEGORY(DragonCrashDedicatedServer);
-
 ADragonCrashGameModeBase::ADragonCrashGameModeBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 #if WITH_GAMELIFT
 	if (!HasAnyFlags(RF_ClassDefaultObject | RF_ArchetypeObject))
 	{
-		UE_LOG(DragonCrashDedicatedServer, Log, TEXT("Running GameLift Server SDK Startup"));
 
 		// get the gamelift module
 		GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
@@ -22,9 +19,9 @@ ADragonCrashGameModeBase::ADragonCrashGameModeBase(const FObjectInitializer& Obj
 
 		// bind event handlers
 		FProcessParameters* params = new FProcessParameters();
-		params->OnStartGameSession.BindUObject(this, &UDragonCrashGameInstance::OnStartGameSession);
-		params->OnTerminate.BindUObject(this, &UDragonCrashGameInstance::OnTerminate);
-		params->OnHealthCheck.BindUObject(this, &UDragonCrashGameInstance::OnHealthCheck);
+		params->OnStartGameSession.BindUObject(this, &ADragonCrashGameModeBase::OnStartGameSession);
+		params->OnTerminate.BindUObject(this, &ADragonCrashGameModeBase::OnTerminate);
+		params->OnHealthCheck.BindUObject(this, &ADragonCrashGameModeBase::OnHealthCheck);
 
 		//This game server tells GameLift that it listens on port 7777 for incoming player connections.
 		params->port = 7777;
@@ -38,7 +35,6 @@ ADragonCrashGameModeBase::ADragonCrashGameModeBase(const FObjectInitializer& Obj
 		//Calling ProcessReady tells GameLift this game server is ready to receive incoming game sessions!
 		GameLiftSdkModule->ProcessReady(*params);
 
-		UE_LOG(DragonCrashDedicatedServer, Log, TEXT("Finished GameLift Server SDK Startup"));
 	}
 #endif
 }
@@ -46,7 +42,6 @@ ADragonCrashGameModeBase::ADragonCrashGameModeBase(const FObjectInitializer& Obj
 void ADragonCrashGameModeBase::OnStartGameSession(Aws::GameLift::Server::Model::GameSession GameLiftSession)
 {
 #if WITH_GAMELIFT
-	UE_LOG(DragonCrashDedicatedServer, Log, TEXT("GameLift Server SDK OnStartGameSession"));
 	
 	if(FString(GameLiftSession.GetName()) == "ffa")
 	{
@@ -69,7 +64,6 @@ void ADragonCrashGameModeBase::OnStartGameSession(Aws::GameLift::Server::Model::
 void ADragonCrashGameModeBase::OnTerminate()
 {
 #if WITH_GAMELIFT
-	UE_LOG(DragonCrashDedicatedServer, Log, TEXT("GameLift Server SDK OnTerminate"));
 	GameLiftSdkModule->ProcessEnding();
 #endif
 }
@@ -77,7 +71,6 @@ void ADragonCrashGameModeBase::OnTerminate()
 bool ADragonCrashGameModeBase::OnHealthCheck()
 {
 #if WITH_GAMELIFT
-	UE_LOG(DragonCrashDedicatedServer, Log, TEXT("GameLift Server SDK OnHealthCheck"));
 	return true;
 #else
 	return false;
@@ -87,21 +80,17 @@ bool ADragonCrashGameModeBase::OnHealthCheck()
 void ADragonCrashGameModeBase::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 #if WITH_GAMELIFT
-	FString PlayerSessionId = ParseOption(Options, TEXT("id"));
-	UE_LOG(DragonCrashDedicatedServer, Log, TEXT("Player joining with PlayerSessionID") + PlayerSessionId);
+	FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("id"));
 	if (!GameLiftSdkModule->AcceptPlayerSession(PlayerSessionId).IsSuccess())
 	{
-		UE_LOG(DragonCrashDedicatedServer, Log, TEXT("GameLift Server SDK AcceptPlayerSession Failed"));
-		ErrorMessage = "failed to validate player session id";
 	}
-	UE_LOG(DragonCrashDedicatedServer, Log, TEXT("GameLift Server SDK AcceptPlayerSession Success"));
 #endif
 }
 
 FString ADragonCrashGameModeBase::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
 {
 #if WITH_GAMELIFT
-	FString PlayerSessionId = ParseOption(Options, TEXT("id"));
+	FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("id"));
 	PlayerSessionIds.Add((AController*) NewPlayerController, PlayerSessionId);
 #endif
 	return Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
