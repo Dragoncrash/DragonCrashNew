@@ -435,19 +435,19 @@ void UAConfigFns::onConstructed() {
 	FileIsValid(filepath);
 
 	//Master
-	if (ReadValid(GFILE, "Audio", "Master"))master_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "Master"));
+	if (ReadValid(GFILE, "Audio", "Master"))master_volume = UKismetStringLibrary::Conv_StringToFloat(ReadValue(GFILE, "Audio", "Master"));
 	else master_volume = .50;
 
 	//SFX
-	if (ReadValid(GFILE, "Audio", "SFX"))sfx_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "SFX"));
+	if (ReadValid(GFILE, "Audio", "SFX"))sfx_volume = UKismetStringLibrary::Conv_StringToFloat(ReadValue(GFILE, "Audio", "SFX"));
 	else sfx_volume = .50;
 
 	//Crowd
-	if (ReadValid(GFILE, "Audio", "Crowd"))crowd_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "Crowd"));
+	if (ReadValid(GFILE, "Audio", "Crowd"))crowd_volume = UKismetStringLibrary::Conv_StringToFloat(ReadValue(GFILE, "Audio", "Crowd"));
 	else crowd_volume = .50;
 
 	//BGM
-	if (ReadValid(GFILE, "Audio", "BGM"))bgm_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "BGM"));
+	if (ReadValid(GFILE, "Audio", "BGM"))bgm_volume = UKismetStringLibrary::Conv_StringToFloat(ReadValue(GFILE, "Audio", "BGM"));
 	else bgm_volume = .50;
 }
 
