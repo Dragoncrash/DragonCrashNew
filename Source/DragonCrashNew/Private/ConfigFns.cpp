@@ -436,25 +436,25 @@ void UAConfigFns::onConstructed() {
 
 	//Master
 	if (ReadValid(GFILE, "Audio", "Master"))master_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "Master"));
-	else master_volume = 50;
+	else master_volume = .50;
 
 	//SFX
 	if (ReadValid(GFILE, "Audio", "SFX"))sfx_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "SFX"));
-	else sfx_volume = 50;
+	else sfx_volume = .50;
 
 	//Crowd
 	if (ReadValid(GFILE, "Audio", "Crowd"))crowd_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "Crowd"));
-	else crowd_volume = 50;
+	else crowd_volume = .50;
 
 	//BGM
 	if (ReadValid(GFILE, "Audio", "BGM"))bgm_volume = UKismetStringLibrary::Conv_StringToInt(ReadValue(GFILE, "Audio", "BGM"));
-	else bgm_volume = 50;
+	else bgm_volume = .50;
 }
 
 void UAConfigFns::syncToFile() {
-	WriteCustomConfig(GFILE, "Audio", "Master", UKismetStringLibrary::Conv_IntToString(master_volume));
-	WriteCustomConfig(GFILE, "Audio", "SFX", UKismetStringLibrary::Conv_IntToString(sfx_volume));
-	WriteCustomConfig(GFILE, "Audio", "Crowd", UKismetStringLibrary::Conv_IntToString(crowd_volume));
-	WriteCustomConfig(GFILE, "Audio", "BGM", UKismetStringLibrary::Conv_IntToString(bgm_volume));
+	WriteCustomConfig(GFILE, "Audio", "Master", UKismetStringLibrary::Conv_FloatToString(master_volume));
+	WriteCustomConfig(GFILE, "Audio", "SFX", UKismetStringLibrary::Conv_FloatToString(sfx_volume));
+	WriteCustomConfig(GFILE, "Audio", "Crowd", UKismetStringLibrary::Conv_FloatToString(crowd_volume));
+	WriteCustomConfig(GFILE, "Audio", "BGM", UKismetStringLibrary::Conv_FloatToString(bgm_volume));
 }
 #pragma endregion

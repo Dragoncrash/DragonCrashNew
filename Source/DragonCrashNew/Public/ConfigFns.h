@@ -200,7 +200,7 @@ public:
 	static float getCrowdVolume() { return crowd_volume; }
 	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
 	static float getBGMVolume() { return bgm_volume; }
-	UFUNCTION(BlueprintPure, Category = "Config|Audio|Variables")
+	UFUNCTION(BlueprintCallable, Category = "Config|Audio|Variables")
 	static void getCustomAudioSettings(float& MasterVolume, float& SFXVolume, float& CrowdVolume, float& BGMVolume) {
 		MasterVolume = getMasterVolume();
 		SFXVolume = getSFXVolume();
