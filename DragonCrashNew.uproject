@@ -1,6 +1,5 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.14",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -23,5 +22,6 @@
 			"Enabled": true,
 			"MarketplaceURL": "http://www.ue4code.com"
 		}
-	]
+	],
+	"EngineAssociation": "4.14"
 }
