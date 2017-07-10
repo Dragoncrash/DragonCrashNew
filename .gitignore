@@ -76,3 +76,7 @@ Plugins/**/Intermediate/*
 
 # DragonCrash Exceptions
 !Plugins/GameLiftServerSDK/ThirdParty/GameLiftServerSDK/Win64/**
+
+# Blender files
+*.blend
+*.blend*
