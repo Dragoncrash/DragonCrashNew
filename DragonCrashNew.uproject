@@ -17,6 +17,5 @@
 			"Name": "GameLiftServerSDK",
 			"Enabled": true
 		}
-	],
-	"EngineAssociation": "4.14"
+	]
 }
